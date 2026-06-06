@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Magical Surprise For You 💌</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@500;600;700&display=swap');
+
+        :root {
+            --pink-soft-gradient: linear-gradient(135deg, #ffe3ec 0%, #ffcbdc 50%, #fbc2eb 100%);
+            --bg-cream: #fbf8f3;
+            --text-dark: #5a4b41;
+            --letter-text-color: #3a2229; 
+            --paper-shadow: 0 10px 30px rgba(90, 75, 65, 0.15);
+            --luxury-gold-glow: 0 0 35px rgba(255, 192, 203, 0.65), 0 0 15px rgba(255, 215, 0, 0.3);
+            --paper-texture-url: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3CfeColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.04 0"/%3E%3C/filter%3E%3Crect width="100" height="100" filter="url(%23noise)" opacity="0.6" fill="%23fff"/%3E%3C/svg%3E');
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            background-image: radial-gradient(#efdfd4 1px, transparent 1px);
+            background-size: 24px 24px;
+            font-family: 'Quicksand', sans-serif;
+            color: var(--text-dark);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 30%, rgba(255, 235, 235, 0.4) 0%, rgba(218, 195, 212, 0.2) 100%);
+            z-index: 999;
+        }
+
+        .stage-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Essential Fix: Allow child focus layer elements to break through layout restrictions */
+        .stage-container.letter-active {
+            overflow: visible !important;
+        }
+
+        .screen-view {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s ease;
+        }
+        .screen-view.hidden { opacity: 0; pointer-events: none; transform: scale(1.02); }
+        .screen-view.active { opacity: 1; pointer-events: auto; transform: scale(1); }
+
+        /* ==========================================
+           1. OPENING SEQUENCE SCREEN (ENVELOPE)
+           ========================================== */
+        #envelope-screen {
+            background: var(--pink-soft-gradient);
+            z-index: 10;
+        }
+
+        .envelope-wrapper {
+            perspective: 1200px;
+            margin-bottom: 2.5rem;
+        }
+
+        .envelope {
+            position: relative;
+            width: 340px;
+            height: 230px;
+            background: #fdf6f0;
+            border-radius: 4px;
+            box-shadow: 0 15px 35px rgba(214, 148, 170, 0.35);
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        .envelope:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .envelope-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #f7e6db;
+            border-radius: 4px;
+        }
+
+        .envelope-top-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 170px solid transparent;
+            border-right: 170px solid transparent;
+            border-top: 125px solid #f2d4c2;
+            transform-origin: top center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+        }
+        .envelope.open .envelope-top-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-front {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 170px solid #f7e6db;
+            border-right: 170px solid #f7e6db;
+            border-bottom: 115px solid #ebd3c5;
+            top: 115px;
+            z-index: 3;
+        }
+        .envelope-front::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 170px solid #f3dbce;
+            border-right: 170px solid transparent;
+            border-bottom: 115px solid transparent;
+            left: -170px;
+            top: 0;
+        }
+
+        .letter-preview {
+            position: absolute;
+            width: 310px;
+            height: 190px;
+            background: #ffffff;
+            left: 15px;
+            top: 25px;
+            border-radius: 2px;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background-image: var(--paper-texture-url);
+        }
+        .envelope.open .letter-preview {
+            transform: translateY(-90px);
+        }
+
+        .heart-seal-stamp {
+            font-size: 2.8rem;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.15));
+            animation: heartPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes heartPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+
+        .envelope-typography {
+            text-align: center;
+            pointer-events: none;
+        }
+        .headline-romantic {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: #724052;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.4);
+            margin-bottom: 0.5rem;
+        }
+        .subtitle-romantic {
+            font-size: 1.1rem;
+            color: #8c5d6e;
+            letter-spacing: 0.5px;
+        }
+
+        .ambient-petals-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            pointer-events: none;
+        }
+        .ambient-petal {
+            position: absolute;
+            background: radial-gradient(circle at center, #ffb3c6, #ff8fa3);
+            border-radius: 10% 80% 20% 80%;
+            opacity: 0.5;
+            animation: floatPetal linear infinite;
+        }
+        @keyframes floatPetal {
+            0% { transform: translateY(-5vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(105vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+
+        #flower-explosion-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* ==========================================
+           2. MAIN SURPRISE SCRAPBOOK PAGE
+           ========================================== */
+        #surprise-screen {
+            background-color: var(--bg-cream);
+        }
+
+        .scrapbook-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr 1fr;
+            gap: 2rem;
+            width: 94%;
+            max-width: 1250px;
+            height: 85vh;
+            align-items: center;
+        }
+
+        .grid-card {
+            position: relative;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: var(--paper-shadow);
+            border: 12px solid #ffffff;
+            transition: transform 0.4s ease;
+        }
+        
+        .card-glow-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .paper-texture-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--paper-texture-url);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .scrapbook-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .washi-tape {
+            position: absolute;
+            width: 100px;
+            height: 30px;
+            background-color: rgba(250, 218, 221, 0.7);
+            backdrop-filter: blur(1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            z-index: 10;
+        }
+        .washi-tape::before {
+            content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
+            background: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 8px);
+        }
+
+        .sticker-flower {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: #fff0f2;
+            border-radius: 50%;
+            box-shadow: 1px 2px 4px rgba(0,0,0,0.08);
+            z-index: 6;
+        }
+        .sticker-flower::before, .sticker-flower::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff0f2; border-radius: 50%;
+        }
+        .sticker-flower::before { transform: rotate(30deg); }
+        .sticker-flower::after { transform: rotate(60deg); }
+        .sticker-flower .center {
+            position: absolute; top: 10px; left: 10px; width: 15px; height: 15px;
+            background: #fcd581; border-radius: 50%; z-index: 7;
+        }
+
+        .cats-caption-label {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.1rem;
+            color: #433831;
+            text-align: center;
+            margin-top: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 2px 3px rgba(90, 75, 65, 0.15);
+            transform: rotate(-1.5deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .bouquet-gift-tag {
+            position: absolute;
+            top: -25px;
+            left: -15px;
+            background: #fffbfc;
+            border: 1px solid #f3d4dc;
+            padding: 8px 16px 8px 24px;
+            border-radius: 4px;
+            box-shadow: 3px 5px 15px rgba(90, 75, 65, 0.12);
+            z-index: 12;
+            transform: rotate(-8deg);
+            background-image: var(--paper-texture-url);
+        }
+        .bouquet-gift-tag::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 7px;
+            height: 7px;
+            background: #5a4b41;
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .gift-tag-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            color: #8a4f62;
+            font-weight: bold;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .left-card { transform: rotate(-3deg); }
+        .display-cats { aspect-ratio: 4/5; }
+
+        .center-card.intense-focus {
+            transform: scale(1.06) rotate(1deg);
+            z-index: 5;
+            border: 14px solid #ffffff;
+            box-shadow: 0 20px 50px rgba(214, 148, 170, 0.4);
+        }
+        .display-bouquet { aspect-ratio: 1/1; }
+        .bouquet-glow { box-shadow: var(--luxury-gold-glow); }
+
+        .right-card {
+            transform: rotate(2deg);
+            min-height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fffdfb;
+        }
+        
+        .right-card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        /* Scrapbook Sub-Envelope Design */
+        .sub-envelope-box {
+            position: relative;
+            width: 260px;
+            height: 180px;
+            background: #fbf5f0;
+            border-radius: 6px;
+            box-shadow: 0 8px 25px rgba(90, 75, 65, 0.12);
+            cursor: pointer;
+            transform-style: preserve-3d;
+            perspective: 800px;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .sub-envelope-box:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(230, 184, 200, 0.3);
+        }
+
+        .sub-env-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #f3e2d5;
+            border-radius: 6px;
+        }
+
+        .sub-env-flap {
+            position: absolute;
+            top: 0; left: 0; width: 0; height: 0;
+            border-left: 130px solid transparent;
+            border-right: 130px solid transparent;
+            border-top: 95px solid #ebd0be;
+            transform-origin: top center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+        }
+        .sub-envelope-box.open-flap .sub-env-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .sub-env-front {
+            position: absolute;
+            bottom: 0; left: 0; width: 0; height: 0;
+            border-left: 130px solid #ecdacb;
+            border-right: 130px solid #ecdacb;
+            border-bottom: 95px solid #dfc7b6;
+            z-index: 4;
+            border-radius: 0 0 6px 6px;
+        }
+        .sub-env-front::before {
+            content: ''; position: absolute; bottom: -95px; left: -130px; width: 0; height: 0;
+            border-left: 130px solid #e5d1c2;
+            border-right: 130px solid transparent;
+            border-bottom: 95px solid transparent;
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 75px; left: 110px;
+            width: 40px; height: 40px;
+            background: radial-gradient(circle at 35% 35%, #e4687d, #b83b52);
+            border-radius: 50%;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2), inset 0 -2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transform-origin: center;
+        }
+        .sub-envelope-box.open-flap .wax-seal {
+            opacity: 0;
+            transform: scale(0.5);
+            pointer-events: none;
+        }
+
+        .open-me-label {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.2rem;
+            color: #a6516f;
+            font-weight: bold;
+            margin-top: 1.2rem;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+        }
+
+        /* ==========================================
+           SLIDING & FULLSCREEN PAPER READ ENGINE
+           ========================================== */
+        .sub-env-letter-card {
+            position: absolute;
+            width: 230px;
+            height: 150px;
+            background: #ffffff;
+            left: 15px; top: 15px;
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            z-index: 2;
+            padding: 15px;
+            overflow: hidden;
+            filter: none !important;
+            backdrop-filter: none !important;
+            
+            transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1),
+                        width 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        height 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        left 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        top 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        box-shadow 0.5s ease;
+        }
+
+        /* FIX: The parent plate stays static, centered, and visible 
+           while content container handles vertical scrolling independently.
+        */
+        .sub-env-letter-card.expanded-fullscreen {
+            position: fixed;
+            z-index: 9999;
+            width: 92%;
+            max-width: 660px;
+            height: 85vh;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) scale(1) !important;
+            
+            background-color: #ffffff !important;
+            background-image: var(--paper-texture-url) !important;
+            border: 12px solid #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 30px 80px rgba(70, 50, 40, 0.35), 0 0 50px rgba(255, 182, 193, 0.25);
+            
+            /* Enforce strict scroll container architecture */
+            padding: 0 !important; 
+            overflow: hidden !important; 
+            filter: none !important;
+        }
+
+        /* Inner scroll frame wrapper */
+        .letter-content-wrapper {
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2.5rem 2.2rem;
+            overflow-y: auto !important; /* Grant native vertical scrolling mechanics */
+            overflow-x: hidden;
+            pointer-events: none;
+            user-select: text; /* Allow user text selection while reading */
+            transition: opacity 0.4s ease 0.5s;
+            scrollbar-width: thin;
+            scrollbar-color: #e4b8c5 #fff3f5;
+        }
+        
+        .sub-env-letter-card.expanded-fullscreen .letter-content-wrapper {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Custom Scrollbar styling for Webkit Engines */
+        .letter-content-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+        .letter-content-wrapper::-webkit-scrollbar-track {
+            background: #fff3f5;
+            border-radius: 10px;
+        }
+        .letter-content-wrapper::-webkit-scrollbar-thumb {
+            background-color: #e4b8c5;
+            border-radius: 10px;
+        }
+
+        /* Crisp text layout specifications */
+        .letter-paper-body {
+            font-family: 'Quicksand', sans-serif;
+            color: var(--letter-text-color);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            word-wrap: break-word;
+            /* Defensive bottom boundary spacing blocks cutoffs */
+            padding-bottom: 3.5rem; 
+        }
+        .sweet-message-paragraph {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600; 
+            text-indent: 12px;
+            text-align: justify;
+        }
+        .letter-header-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: #7a3249;
+            margin-bottom: 1.8rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Floating Animation Loops */
+        .floating-animation-slow { animation: floatSlow 6s ease-in-out infinite alternate; }
+        .floating-animation-medium { animation: floatMedium 5s ease-in-out infinite alternate; }
+
+        @keyframes floatSlow {
+            0% { transform: translateY(0) rotate(-3deg); }
+            100% { transform: translateY(-12px) rotate(-1.5deg); }
+        }
+        .right-card.floating-animation-slow {
+            animation: floatRightCard 6.5s ease-in-out infinite alternate;
+        }
+        @keyframes floatRightCard {
+            0% { transform: translateY(0) rotate(2deg); }
+            100% { transform: translateY(-10px) rotate(3.5deg); }
+        }
+        @keyframes floatMedium {
+            0% { transform: scale(1.06) translateY(0) rotate(1deg); }
+            100% { transform: scale(1.06) translateY(-16px) rotate(-0.5deg); }
+        }
+
+        .emitter-heart, .emitter-sparkle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10000;
+            animation: particleUpAndOut 2.5s ease-out infinite;
+        }
+        @keyframes particleUpAndOut {
+            0% { transform: translateY(20px) translateX(0) scale(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-160px) translateX(var(--emit-x, 30px)) scale(var(--emit-scale, 1.2)); opacity: 0; }
+        }
+
+        /* Dimming Screen Curtain Accent Layer */
+        .modal-dimming-curtain {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(45, 35, 30, 0.45);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .modal-dimming-curtain.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 992px) {
+            body { overflow-y: auto; }
+            .stage-container { position: relative; height: auto; width: 100%; overflow: visible; }
+            .screen-view { position: relative; height: auto; min-height: 100vh; padding: 2rem 0; }
+            .scrapbook-grid-layout { grid-template-columns: 1fr; height: auto; gap: 4rem; padding: 2rem 1rem; }
+            .center-card.intense-focus { order: 1; transform: scale(1) rotate(0deg); }
+            .left-card { order: 2; transform: rotate(0deg); }
+            .right-card { order: 3; transform: rotate(0deg); min-height: 400px; }
+            
+            .sub-env-letter-card.expanded-fullscreen { 
+                width: 94%; 
+                height: 82vh; 
+            }
+            .letter-content-wrapper {
+                padding: 2rem 1.2rem;
+            }
+            .sweet-message-paragraph {
+                font-size: 1.05rem;
+                line-height: 1.7;
+            }
+            @keyframes floatMedium { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
+            @keyframes floatSlow { 0% { transform: translateY(0); } 100% { transform: translateY(-8px); } }
+            @keyframes floatRightCard { 0% { transform: translateY(0); } 100% { transform: translateY(-8px); } }
+        }
+
+        .audio-system-hub {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 14px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .hub-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+    <div class="modal-dimming-curtain" id="dimming-curtain"></div>
+
+    <audio id="scrapbook-bg-music" src="mus.mp3" loop></audio>
+
+    <div class="audio-system-hub">
+        <button class="hub-btn" id="globalMuteToggle">🎵 Playing Music</button>
+    </div>
+
+    <main class="stage-container" id="global-stage-master">
+
+        <div id="envelope-screen" class="screen-view active">
+            <div class="ambient-petals-container" id="intro-ambient-petals"></div>
+            
+            <div class="envelope-wrapper">
+                <div class="envelope" id="master-envelope-interactive">
+                    <div class="envelope-back"></div>
+                    <div class="letter-preview">
+                        <div class="heart-seal-stamp">💝</div>
+                    </div>
+                    <div class="envelope-top-flap"></div>
+                    <div class="envelope-front"></div>
+                </div>
+            </div>
+
+            <div class="envelope-typography">
+                <h1 class="headline-romantic">A Special Letter For You 💌</h1>
+                <p class="subtitle-romantic">Click the envelope to open your surprise.</p>
+            </div>
+        </div>
+
+        <canvas id="flower-explosion-canvas"></canvas>
+
+        <div id="surprise-screen" class="screen-view hidden">
+            
+            <div class="scrapbook-grid-layout">
+                
+                <div class="grid-card left-card floating-animation-slow">
+                    <div class="washi-tape" style="top: -15px; left: 20px; transform: rotate(-5deg);"></div>
+                    <div class="sticker-flower" style="bottom: 45px; right: -15px;"><div class="center"></div></div>
+                    
+                    <div class="card-glow-wrapper" style="padding-bottom: 10px;">
+                        <div class="paper-texture-overlay"></div>
+                        <img src="copcat.jpg" alt="Cozy Cats Room" class="scrapbook-image display-cats">
+                        <div id="cats-hearts-emitter" style="position: absolute; width:100%; height:100%; top:0; left:0;"></div>
+                        <div class="cats-caption-label">Us 🖤🤍</div>
+                    </div>
+                </div>
+
+                <div class="grid-card center-card intense-focus floating-animation-medium">
+                    <div class="bouquet-gift-tag">
+                        <div class="gift-tag-text">Flowers For You 🌸</div>
+                    </div>
+
+                    <div class="washi-tape" style="top: -18px; right: 25%; transform: rotate(4deg); background-color: rgba(223, 211, 245, 0.7);"></div>
+                    
+                    <div class="card-glow-wrapper bouquet-glow">
+                        <div class="paper-texture-overlay"></div>
+                        <div id="bouquet-sparkles-emitter" style="position: absolute; width:100%; height:100%; top:0; left:0;"></div>
+                        <img src="boq.jpg" alt="Premium Flower Bouquet" class="scrapbook-image display-bouquet">
+                    </div>
+                </div>
+
+                <div class="grid-card right-card floating-animation-slow">
+                    <div class="sticker-flower" style="top: -15px; left: 15px;"><div class="center"></div></div>
+                    <div class="paper-texture-overlay"></div>
+                    
+                    <div class="right-card-container">
+                        
+                        <div class="sub-envelope-box" id="sub-envelope-trigger">
+                            <div class="sub-env-back"></div>
+                            
+                            <div class="sub-env-letter-card" id="sliding-letter-node">
+                                <div class="letter-content-wrapper">
+                                    <div class="letter-paper-body">
+                                        <h2 class="letter-header-title">Hi love,</h2>
+                                        
+                                        <p class="sweet-message-paragraph">I know you're not feeling well today hon. I know your body is tired kay tungod sa imo fever ug ing samutan pa sa imo period. I wish I could be there beside you right now to take care of you and help you feel better.</p>
+                                        
+                                        <p class="sweet-message-paragraph">Please don't force yourself to do too much today okay? dili na mag tigas nang ulohihi Rest as much as you need love, eat whenever you can, and drink plenty of water. Your health is more important than anything else right now.</p>
+                                        
+                                        <p class="sweet-message-paragraph">I know these days are difficult, and I know the pain can make you feel exhausted. But I hope you remember that you are stronger than you think. You've already overcome so many hard days before, and you'll get through this one too.</p>
+                                        
+                                        <p class="sweet-message-paragraph">Even if I can't take away your pain, I hope this little surprise can make you smile even for a moment. I wanted to remind you that someone is thinking about you and caring about you.</p>
+                                        
+                                        <p class="sweet-message-paragraph">So for now, just rest, relax, and focus on getting better. I'll be here cheering for you, praying for you, and waiting for your smile to come back. loveyaa somuch.❤️</p>
+                                    </div>
+                                    <div id="fullscreen-hearts-emitter" style="position: absolute; width:100%; height:100%; top:0; left:0; pointer-events:none;"></div>
+                                </div>
+                            </div>
+
+                            <div class="sub-env-flap"></div>
+                            <div class="sub-env-front"></div>
+                            <div class="wax-seal">👑</div>
+                        </div>
+
+                        <div class="open-me-label">Open Me 💌</div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const globalStage = document.getElementById("global-stage-master");
+            const envelope = document.getElementById("master-envelope-interactive");
+            const envelopeScreen = document.getElementById("envelope-screen");
+            const surpriseScreen = document.getElementById("surprise-screen");
+            const canvas = document.getElementById("flower-explosion-canvas");
+            const muteButton = document.getElementById("globalMuteToggle");
+            const bgMusic = document.getElementById("scrapbook-bg-music");
+
+            const subEnvelope = document.getElementById("sub-envelope-trigger");
+            const slidingLetter = document.getElementById("sliding-letter-node");
+            const dimmingCurtain = document.getElementById("dimming-curtain");
+
+            setupIntroAmbientPetals();
+
+            // Screen One: Primary Envelope Opener Sequence
+            envelope.addEventListener("click", () => {
+                if (envelope.classList.contains("open")) return;
+                envelope.classList.add("open");
+
+                setTimeout(() => {
+                    if (bgMusic) {
+                        bgMusic.play().catch(err => console.log("Audio presentation handled safely:", err));
+                    }
+                }, 300);
+
+                setTimeout(() => {
+                    executeFlowerExplosionBurst(() => {
+                        envelopeScreen.classList.remove("active");
+                        envelopeScreen.classList.add("hidden");
+                        
+                        surpriseScreen.classList.remove("hidden");
+                        surpriseScreen.classList.add("active");
+
+                        startScrapbookDecoEmitters();
+                    });
+                }, 800);
+            });
+
+            // Screen Two: Scrapbook Sub-Envelope Action Timelines
+            subEnvelope.addEventListener("click", function handleLetterOpening() {
+                if (subEnvelope.classList.contains("open-flap")) return;
+                
+                subEnvelope.classList.add("open-flap");
+
+                setTimeout(() => {
+                    slidingLetter.style.transform = "translateY(-120px)";
+                    slidingLetter.style.zIndex = "10";
+                }, 650);
+
+                setTimeout(() => {
+                    // Adjust master layout coordinates to safely allow text scrolling
+                    globalStage.classList.add("letter-active");
+                    dimmingCurtain.classList.add("active");
+                    slidingLetter.classList.add("expanded-fullscreen");
+                    
+                    triggerFullscreenHeartBlast();
+                }, 1400);
+            });
+
+            // Dismiss Fullscreen reading layer state elements
+            dimmingCurtain.addEventListener("click", () => {
+                globalStage.classList.remove("letter-active");
+                dimmingCurtain.classList.remove("active");
+                slidingLetter.classList.remove("expanded-fullscreen");
+                slidingLetter.style.transform = "translateY(0)";
+                slidingLetter.style.zIndex = "2";
+                subEnvelope.classList.remove("open-flap");
+            });
+
+            function setupIntroAmbientPetals() {
+                const targetBox = document.getElementById("intro-ambient-petals");
+                for (let i = 0; i < 20; i++) {
+                    const petal = document.createElement("div");
+                    petal.className = "ambient-petal";
+                    petal.style.left = Math.random() * 100 + "vw";
+                    petal.style.width = petal.style.height = (Math.random() * 12 + 8) + "px";
+                    petal.style.animationDuration = (Math.random() * 6 + 7) + "s";
+                    petal.style.animationDelay = (Math.random() * -6) + "s";
+                    targetBox.appendChild(petal);
+                }
+            }
+
+            function executeFlowerExplosionBurst(transitionCallback) {
+                const ctx = canvas.getContext("2d");
+                let loopId;
+                
+                const adjustViewportDimensions = () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                };
+                adjustViewportDimensions();
+
+                const particlesArray = [];
+                const romanticColors = ['#ff8fa3', '#ffb3c6', '#ffccd5', '#fff0f3', '#fbc2eb', '#e6b8c8'];
+                
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+
+                for (let i = 0; i < 170; i++) {
+                    const movementAngle = Math.random() * Math.PI * 2;
+                    const velocitySpeed = Math.random() * 10 + 4;
+                    particlesArray.push({
+                        x: centerX,
+                        y: centerY,
+                        vx: Math.cos(movementAngle) * velocitySpeed,
+                        vy: Math.sin(movementAngle) * velocitySpeed,
+                        radius: Math.random() * 15 + 6,
+                        color: romanticColors[Math.floor(Math.random() * romanticColors.length)],
+                        alpha: 1,
+                        rotation: Math.random() * 360,
+                        spinValue: Math.random() * 4 - 2,
+                        gravity: 0.06
+                    });
+                }
+
+                let executionTicks = 0;
+                function animateCanvasFrame() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    let survivingElementsCount = 0;
+
+                    particlesArray.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += p.gravity;
+                        p.rotation += p.spinValue;
+                        
+                        if (executionTicks > 45) {
+                            p.alpha -= 0.016;
+                        }
+
+                        if (p.alpha > 0) {
+                          survivingElementsCount++;
+                          ctx.save();
+                          ctx.translate(p.x, p.y);
+                          ctx.rotate(p.rotation * Math.PI / 180);
+                          ctx.globalAlpha = p.alpha;
+                          ctx.fillStyle = p.color;
+                          
+                          ctx.beginPath();
+                          ctx.moveTo(0, 0);
+                          ctx.bezierCurveTo(-p.radius, -p.radius/2, -p.radius, p.radius, 0, p.radius * 1.5);
+                          ctx.bezierCurveTo(p.radius, p.radius, p.radius, -p.radius/2, 0, 0);
+                          ctx.fill();
+                          ctx.restore();
+                        }
+                    });
+
+                    executionTicks++;
+
+                    if (executionTicks === 40) {
+                        transitionCallback();
+                    }
+
+                    if (survivingElementsCount > 0) {
+                        loopId = requestAnimationFrame(animateCanvasFrame);
+                    } else {
+                        cancelAnimationFrame(loopId);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                }
+                animateCanvasFrame();
+            }
+
+            function startScrapbookDecoEmitters() {
+                configureCardIntervalEmitter('cats-hearts-emitter', '❤️', 850);
+                configureCardIntervalEmitter('bouquet-sparkles-emitter', '✨', 400);
+            }
+
+            function configureCardIntervalEmitter(elementId, designChar, timingInterval) {
+                const holderNode = document.getElementById(elementId);
+                if (!holderNode) return;
+
+                setInterval(() => {
+                    const leaf = document.createElement("span");
+                    leaf.className = designChar === '❤️' ? "emitter-heart" : "emitter-sparkle";
+                    leaf.innerText = designChar;
+                    leaf.style.left = Math.random() * 80 + 10 + "%";
+                    leaf.style.setProperty('--emit-x', (Math.random() * 80 - 40) + "px");
+                    leaf.style.setProperty('--emit-scale', Math.random() * 0.5 + 0.8);
+                    
+                    holderNode.appendChild(leaf);
+                    setTimeout(() => leaf.remove(), 2400);
+                }, timingInterval);
+            }
+
+            function triggerFullscreenHeartBlast() {
+                const targetedContainer = document.getElementById("fullscreen-hearts-emitter");
+                if (!targetedContainer) return;
+
+                for (let i = 0; i < 20; i++) {
+                    const customSpark = document.createElement("span");
+                    customSpark.className = "emitter-heart";
+                    customSpark.innerText = Math.random() > 0.5 ? "💖" : "✨";
+                    customSpark.style.left = Math.random() > 0.5 ? "4%" : "91%";
+                    customSpark.style.top = Math.random() * 60 + 15 + "%";
+                    customSpark.style.setProperty('--emit-x', (Math.random() * 60 - 30) + "px");
+                    customSpark.style.setProperty('--emit-scale', Math.random() * 0.6 + 0.7);
+                    targetedContainer.appendChild(customSpark);
+                    setTimeout(() => customSpark.remove(), 2400);
+                }
+            }
+
+            muteButton.addEventListener("click", () => {
+                if (!bgMusic) return;
+                if (bgMusic.paused) {
+                    bgMusic.play();
+                    muteButton.innerText = "🎵 Playing Music";
+                } else {
+                    bgMusic.pause();
+                    muteButton.innerText = "🔇 Music Paused";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
